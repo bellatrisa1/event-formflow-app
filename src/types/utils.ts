@@ -1,3 +1,5 @@
+import type { Theme } from "./types";
+
 export function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -34,3 +36,27 @@ export function uid() {
 export function clamp(n: number, a: number, b: number) {
   return Math.max(a, Math.min(b, n));
 }
+
+export const THEME_ICONS: Record<Theme, string> = {
+  violet: "🟪",
+  orange: "🟧",
+  yellow: "🟨",
+  green: "🟩",
+  blue: "🟦",
+  black: "⬛️",
+  white: "⬜️",
+  brown: "🟫",
+  red: "🟥",
+};
+
+export const THEME_LABELS: Record<Theme, string> = {
+  violet: "Фиолетовый",
+  orange: "Оранжевый",
+  yellow: "Жёлтый",
+  green: "Зелёный",
+  blue: "Синий",
+  black: "Чёрный",
+  white: "Белый",
+  brown: "Коричневый",
+  red: "Красный",
+};

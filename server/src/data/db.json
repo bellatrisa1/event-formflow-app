@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "id": "0be8229f-67ce-48c0-86d6-358bfbd270d8",
+      "name": "белла",
+      "email": "bella@gmail.com",
+      "password": "$2a$10$vS.f7U6rTRwkSOjgJpXXXO7w4EHuC8rP9H1JOOxR7EY2xC5u41tK6"
+    }
+  ],
+  "forms": [
+    {
+      "id": "9eca067e-16c6-4fbd-aef9-ef62adfdcf28",
+      "userId": "0be8229f-67ce-48c0-86d6-358bfbd270d8",
+      "title": "Организовать собрание",
+      "theme": "violet",
+      "responses": 0,
+      "createdAt": "2026-05-09",
+      "lastResponseAt": "2026-05-09",
+      "updatedAt": 1778334815446
+    },
+    {
+      "id": "08cc66a8-3805-4201-905a-7b9b3e26ae44",
+      "userId": "0be8229f-67ce-48c0-86d6-358bfbd270d8",
+      "title": "Регистрация на митап",
+      "theme": "red",
+      "responses": 0,
+      "createdAt": "2026-05-09",
+      "lastResponseAt": "2026-05-11",
+      "updatedAt": 1778334798949
+    }
+  ]
+}

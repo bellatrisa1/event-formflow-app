@@ -1,7 +1,6 @@
-import React from "react";
-import type { FormItem } from "../types/types";
-import { formatRelativeRu } from "../types/utils";
-import { cn } from "../types/utils";
+import React from 'react';
+import type { FormItem } from '../types/types';
+import { formatRelativeRu, cn, THEME_ICONS } from '../types/utils';
 
 type Props = {
   form: FormItem;
@@ -23,16 +22,9 @@ export default function FormCard({
   return (
     <article className="form-card">
       <div className="form-card-header">
-        <div
-          className={cn(
-            "form-card-icon",
-            form.theme === "orange"
-              ? "form-card-icon--orange"
-              : "form-card-icon--violet",
-          )}
-        >
+        <div className={cn('form-card-icon', `form-card-icon--${form.theme}`)}>
           <span className="icon" aria-hidden="true">
-            {form.theme === "orange" ? "🟧" : "🟪"}
+            {THEME_ICONS[form.theme]}
           </span>
         </div>
         <span className="form-card-title">{form.title}</span>
@@ -47,7 +39,6 @@ export default function FormCard({
           </span>
           <span>Редактировать</span>
         </button>
-
         <button
           className="btn btn-secondary"
           type="button"
@@ -58,14 +49,12 @@ export default function FormCard({
           </span>
           <span>Аналитика</span>
         </button>
-
         <button className="btn btn-secondary" type="button" onClick={onClone}>
           <span className="icon" aria-hidden="true">
             ⧉
           </span>
           <span>Клонировать</span>
         </button>
-
         <button
           className="btn btn-danger"
           type="button"

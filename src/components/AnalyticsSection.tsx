@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import type { FormItem } from "../types/types";
-import { clamp } from "../types/utils";
-import { regSeriesBase } from "../types/data";
+import React, { useEffect, useMemo, useRef } from 'react';
+import type { FormItem } from '../types/types';
+import { clamp } from '../types/utils';
+import { regSeriesBase } from '../types/data';
 
 type Props = {
   forms: FormItem[];
@@ -25,14 +25,14 @@ export default function AnalyticsSection({
   const series = useMemo(() => {
     const influence = clamp(Math.round(totalParticipants / 10), 0, 20);
     return regSeriesBase.map(
-      (v, i) => v + Math.round(influence * (i / (regSeriesBase.length - 1))),
+      (v, i) => v + Math.round(influence * (i / (regSeriesBase.length - 1)))
     );
   }, [totalParticipants]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const parent = canvas.parentElement;
@@ -58,8 +58,7 @@ export default function AnalyticsSection({
 
     ctx.globalAlpha = 0.85;
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "#e5e7eb";
-
+    ctx.strokeStyle = '#e5e7eb';
     for (let x = 0; x <= 6; x++) {
       const xx = pad + (innerW * x) / 6;
       ctx.beginPath();
@@ -77,7 +76,7 @@ export default function AnalyticsSection({
 
     ctx.globalAlpha = 1;
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#7c3aed";
+    ctx.strokeStyle = '#7c3aed';
     ctx.beginPath();
     series.forEach((v, i) => {
       const t = i / (series.length - 1);
@@ -88,7 +87,7 @@ export default function AnalyticsSection({
     });
     ctx.stroke();
 
-    ctx.fillStyle = "#7c3aed";
+    ctx.fillStyle = '#7c3aed';
     series.forEach((v, i) => {
       const t = i / (series.length - 1);
       const x = pad + innerW * t;
@@ -100,7 +99,7 @@ export default function AnalyticsSection({
   }, [series]);
 
   return (
-    <section className={standalone ? "" : "analytics"}>
+    <section className={standalone ? '' : 'analytics'}>
       {!standalone && (
         <>
           <h2 className="section-title">
@@ -124,7 +123,6 @@ export default function AnalyticsSection({
             </div>
             <div className="stat-value">{totalParticipants}</div>
           </div>
-
           <div className="stat-card stat-card--orange">
             <div className="stat-header">
               <span className="icon icon-orange" aria-hidden="true">
@@ -162,13 +160,7 @@ export default function AnalyticsSection({
           <tbody>
             {rows.map((f) => (
               <tr key={f.id}>
-                <td
-                  className={
-                    f.theme === "orange"
-                      ? "cell-highlight-orange"
-                      : "cell-highlight-violet"
-                  }
-                >
+                <td className={`cell-highlight cell-highlight--${f.theme}`}>
                   {f.title}
                 </td>
                 <td>{f.responses}</td>
@@ -184,6 +176,6 @@ export default function AnalyticsSection({
 }
 
 function toRuDate(iso: string) {
-  const [y, m, d] = iso.split("-");
+  const [y, m, d] = iso.split('-');
   return y && m && d ? `${d}.${m}.${y}` : iso;
 }

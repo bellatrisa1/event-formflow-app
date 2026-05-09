@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
-import type { FormDraft, FormItem, Theme } from "../types/types";
-import Modal from "./Modal";
+import React, { useEffect, useMemo, useState } from 'react';
+import type { FormDraft, FormItem, Theme } from '../types/types';
+import { THEME_ICONS, THEME_LABELS } from '../types/utils';
+import Modal from './Modal';
 
 type Props = {
   open: boolean;
-  mode: "create" | "edit";
+  mode: 'create' | 'edit';
   form: FormItem | null;
   onClose: () => void;
   onSubmit: (payload: FormDraft) => void;
@@ -17,25 +18,24 @@ export default function FormModal({
   onClose,
   onSubmit,
 }: Props) {
-  const isEdit = mode === "edit";
+  const isEdit = mode === 'edit';
 
   const initial = useMemo<FormDraft>(() => {
     if (!isEdit || !form) {
       const iso = new Date().toISOString().slice(0, 10);
       return {
-        id: "",
-        title: "",
-        theme: "violet",
+        id: '',
+        title: '',
+        theme: 'violet',
         responses: 0,
         createdAt: iso,
         lastResponseAt: iso,
       };
     }
-
     return {
       id: form.id,
       title: form.title,
-      theme: form.theme ?? "violet",
+      theme: form.theme ?? 'violet',
       responses: Number(form.responses) || 0,
       createdAt: form.createdAt,
       lastResponseAt: form.lastResponseAt,
@@ -56,10 +56,9 @@ export default function FormModal({
     e.preventDefault();
     const title = state.title.trim();
     if (!title) {
-      alert("Введите название формы.");
+      alert('Введите название формы.');
       return;
     }
-
     onSubmit({
       ...state,
       title,
@@ -70,7 +69,7 @@ export default function FormModal({
   return (
     <Modal
       open={open}
-      title={isEdit ? "Редактировать форму" : "Новая форма"}
+      title={isEdit ? 'Редактировать форму' : 'Новая форма'}
       onClose={onClose}
     >
       <form className="modal-body" onSubmit={handleSubmit}>
@@ -79,7 +78,7 @@ export default function FormModal({
           <input
             className="input"
             value={state.title}
-            onChange={(e) => setField("title", e.target.value)}
+            onChange={(e) => setField('title', e.target.value)}
             placeholder="Например: Регистрация на митап"
           />
         </div>
@@ -89,10 +88,15 @@ export default function FormModal({
           <select
             className="input"
             value={state.theme}
-            onChange={(e) => setField("theme", e.target.value as Theme)}
+            onChange={(e) => setField('theme', e.target.value as Theme)}
           >
-            <option value="violet">Violet</option>
-            <option value="orange">Orange</option>
+            {(Object.entries(THEME_LABELS) as [Theme, string][]).map(
+              ([key, label]) => (
+                <option key={key} value={key}>
+                  {THEME_ICONS[key]} {label}
+                </option>
+              )
+            )}
           </select>
         </div>
 
@@ -104,17 +108,16 @@ export default function FormModal({
               type="number"
               min={0}
               value={state.responses}
-              onChange={(e) => setField("responses", Number(e.target.value))}
+              onChange={(e) => setField('responses', Number(e.target.value))}
             />
           </div>
-
           <div className="field">
             <label className="label">Дата создания</label>
             <input
               className="input"
               type="date"
               value={state.createdAt}
-              onChange={(e) => setField("createdAt", e.target.value)}
+              onChange={(e) => setField('createdAt', e.target.value)}
             />
           </div>
         </div>
@@ -125,7 +128,7 @@ export default function FormModal({
             className="input"
             type="date"
             value={state.lastResponseAt}
-            onChange={(e) => setField("lastResponseAt", e.target.value)}
+            onChange={(e) => setField('lastResponseAt', e.target.value)}
           />
         </div>
 
@@ -134,7 +137,7 @@ export default function FormModal({
             Отмена
           </button>
           <button className="btn btn-primary" type="submit">
-            {isEdit ? "Сохранить" : "Создать"}
+            {isEdit ? 'Сохранить' : 'Создать'}
           </button>
         </div>
       </form>

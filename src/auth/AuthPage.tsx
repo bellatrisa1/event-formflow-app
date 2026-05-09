@@ -1,12 +1,18 @@
-import React, { useMemo, useState } from "react";
-import "./auth.scss"; // если ты положишь стили в src/auth/auth.scss
+import React, { useMemo, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { login, register, clearError } from '../store/authSlice';
+import { useNavigate } from 'react-router-dom'; // если есть роутер
 
-type Tab = "login" | "register";
+// Если роутера нет — используем просто функцию вместо navigate
+// Пока сделаем без роутера, просто перезагрузка или колбэк
+
+import './auth.scss';
+
+type Tab = 'login' | 'register';
 
 type LoginState = {
   email: string;
   password: string;
-  remember: boolean;
 };
 
 type RegisterState = {
@@ -14,65 +20,63 @@ type RegisterState = {
   email: string;
   password: string;
   password2: string;
-  terms: boolean;
 };
 
 export default function AuthPage() {
-  const [tab, setTab] = useState<Tab>("login");
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
 
-  const [login, setLogin] = useState<LoginState>({
-    email: "",
-    password: "",
-    remember: true,
+  const [tab, setTab] = useState<Tab>('login');
+
+  const [loginState, setLoginState] = useState<LoginState>({
+    email: '',
+    password: '',
   });
 
-  const [reg, setReg] = useState<RegisterState>({
-    name: "",
-    email: "",
-    password: "",
-    password2: "",
-    terms: false,
+  const [regState, setRegState] = useState<RegisterState>({
+    name: '',
+    email: '',
+    password: '',
+    password2: '',
   });
-
-  const [message, setMessage] = useState<string>("");
 
   const canRegister = useMemo(() => {
-    if (!reg.name.trim()) return false;
-    if (!reg.email.trim()) return false;
-    if (reg.password.length < 6) return false;
-    if (reg.password !== reg.password2) return false;
-    if (!reg.terms) return false;
+    if (!regState.name.trim()) return false;
+    if (!regState.email.trim()) return false;
+    if (regState.password.length < 6) return false;
+    if (regState.password !== regState.password2) return false;
     return true;
-  }, [reg]);
+  }, [regState]);
 
-  function onSubmitLogin(e: React.FormEvent) {
+  function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setMessage("");
+    dispatch(clearError());
 
-    if (!login.email.trim() || !login.password.trim()) {
-      setMessage("Заполните e-mail и пароль.");
+    if (!loginState.email.trim() || !loginState.password.trim()) {
       return;
     }
 
-    // Пока мок: позже заменим на запрос к серверу
-    setMessage(`✅ Вход выполнен (демо). Email: ${login.email}`);
+    dispatch(login({ email: loginState.email, password: loginState.password }));
   }
 
-  function onSubmitRegister(e: React.FormEvent) {
+  function handleRegister(e: React.FormEvent) {
     e.preventDefault();
-    setMessage("");
+    dispatch(clearError());
 
     if (!canRegister) {
-      if (reg.password !== reg.password2) {
-        setMessage("Пароли не совпадают.");
+      if (regState.password !== regState.password2) {
         return;
       }
-      setMessage("Проверьте поля регистрации (пароль минимум 6 символов).");
       return;
     }
 
-    // Пока мок: позже заменим на запрос к серверу
-    setMessage(`✅ Аккаунт создан (демо). Добро пожаловать, ${reg.name}!`);
+    dispatch(
+      register({
+        name: regState.name,
+        email: regState.email,
+        password: regState.password,
+      })
+    );
   }
 
   return (
@@ -116,16 +120,16 @@ export default function AuthPage() {
               <button
                 type="button"
                 className={
-                  tab === "login"
-                    ? "auth-tab-label auth-tab-label--active"
-                    : "auth-tab-label"
+                  tab === 'login'
+                    ? 'auth-tab-label auth-tab-label--active'
+                    : 'auth-tab-label'
                 }
                 onClick={() => {
-                  setMessage("");
-                  setTab("login");
+                  dispatch(clearError());
+                  setTab('login');
                 }}
                 role="tab"
-                aria-selected={tab === "login"}
+                aria-selected={tab === 'login'}
               >
                 Вход
               </button>
@@ -133,30 +137,35 @@ export default function AuthPage() {
               <button
                 type="button"
                 className={
-                  tab === "register"
-                    ? "auth-tab-label auth-tab-label--active"
-                    : "auth-tab-label"
+                  tab === 'register'
+                    ? 'auth-tab-label auth-tab-label--active'
+                    : 'auth-tab-label'
                 }
                 onClick={() => {
-                  setMessage("");
-                  setTab("register");
+                  dispatch(clearError());
+                  setTab('register');
                 }}
                 role="tab"
-                aria-selected={tab === "register"}
+                aria-selected={tab === 'register'}
               >
                 Регистрация
               </button>
             </div>
 
-            {/* Message */}
-            {message && <div className="auth-message">{message}</div>}
+            {/* Error message */}
+            {error && (
+              <div className="auth-message auth-message--error">{error}</div>
+            )}
+
+            {/* Loading */}
+            {loading && <div className="auth-message">Загрузка...</div>}
 
             {/* LOGIN FORM */}
-            {tab === "login" && (
+            {tab === 'login' && (
               <form
                 className="auth-form"
                 autoComplete="on"
-                onSubmit={onSubmitLogin}
+                onSubmit={handleLogin}
               >
                 <div className="auth-form-header">
                   <h1>Войти в аккаунт</h1>
@@ -173,9 +182,12 @@ export default function AuthPage() {
                     name="email"
                     placeholder="you@example.com"
                     required
-                    value={login.email}
+                    value={loginState.email}
                     onChange={(e) =>
-                      setLogin((s) => ({ ...s, email: e.target.value }))
+                      setLoginState((s) => ({
+                        ...s,
+                        email: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -187,7 +199,7 @@ export default function AuthPage() {
                       type="button"
                       className="auth-link-small"
                       onClick={() =>
-                        alert("Позже сделаем восстановление пароля")
+                        alert('Восстановление пароля пока недоступно')
                       }
                     >
                       Забыли пароль?
@@ -200,39 +212,32 @@ export default function AuthPage() {
                     name="password"
                     placeholder="Введите пароль"
                     required
-                    value={login.password}
+                    value={loginState.password}
                     onChange={(e) =>
-                      setLogin((s) => ({ ...s, password: e.target.value }))
+                      setLoginState((s) => ({
+                        ...s,
+                        password: e.target.value,
+                      }))
                     }
                   />
                 </div>
 
-                <div className="auth-field auth-field-inline">
-                  <label className="auth-checkbox">
-                    <input
-                      type="checkbox"
-                      name="remember"
-                      checked={login.remember}
-                      onChange={(e) =>
-                        setLogin((s) => ({ ...s, remember: e.target.checked }))
-                      }
-                    />
-                    <span>Запомнить меня</span>
-                  </label>
-                </div>
-
-                <button type="submit" className="auth-btn auth-btn-primary">
-                  Войти
+                <button
+                  type="submit"
+                  className="auth-btn auth-btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? 'Вход...' : 'Войти'}
                 </button>
 
                 <p className="auth-bottom-text">
-                  Нет аккаунта?{" "}
+                  Нет аккаунта?{' '}
                   <button
                     type="button"
                     className="auth-link-inline"
                     onClick={() => {
-                      setMessage("");
-                      setTab("register");
+                      dispatch(clearError());
+                      setTab('register');
                     }}
                   >
                     Зарегистрироваться
@@ -242,11 +247,11 @@ export default function AuthPage() {
             )}
 
             {/* REGISTER FORM */}
-            {tab === "register" && (
+            {tab === 'register' && (
               <form
                 className="auth-form"
                 autoComplete="on"
-                onSubmit={onSubmitRegister}
+                onSubmit={handleRegister}
               >
                 <div className="auth-form-header">
                   <h1>Создать аккаунт</h1>
@@ -263,9 +268,9 @@ export default function AuthPage() {
                     name="name"
                     placeholder="Как к вам обращаться"
                     required
-                    value={reg.name}
+                    value={regState.name}
                     onChange={(e) =>
-                      setReg((s) => ({ ...s, name: e.target.value }))
+                      setRegState((s) => ({ ...s, name: e.target.value }))
                     }
                   />
                 </div>
@@ -278,9 +283,9 @@ export default function AuthPage() {
                     name="email"
                     placeholder="you@example.com"
                     required
-                    value={reg.email}
+                    value={regState.email}
                     onChange={(e) =>
-                      setReg((s) => ({ ...s, email: e.target.value }))
+                      setRegState((s) => ({ ...s, email: e.target.value }))
                     }
                   />
                 </div>
@@ -293,9 +298,13 @@ export default function AuthPage() {
                     name="password"
                     placeholder="Придумайте пароль (мин. 6 символов)"
                     required
-                    value={reg.password}
+                    minLength={6}
+                    value={regState.password}
                     onChange={(e) =>
-                      setReg((s) => ({ ...s, password: e.target.value }))
+                      setRegState((s) => ({
+                        ...s,
+                        password: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -308,44 +317,38 @@ export default function AuthPage() {
                     name="password2"
                     placeholder="Повторите пароль"
                     required
-                    value={reg.password2}
+                    value={regState.password2}
                     onChange={(e) =>
-                      setReg((s) => ({ ...s, password2: e.target.value }))
+                      setRegState((s) => ({
+                        ...s,
+                        password2: e.target.value,
+                      }))
                     }
                   />
-                </div>
-
-                <div className="auth-field auth-field-inline">
-                  <label className="auth-checkbox">
-                    <input
-                      type="checkbox"
-                      name="terms"
-                      required
-                      checked={reg.terms}
-                      onChange={(e) =>
-                        setReg((s) => ({ ...s, terms: e.target.checked }))
-                      }
-                    />
-                    <span>Я принимаю условия использования сервиса</span>
-                  </label>
+                  {regState.password2 &&
+                    regState.password !== regState.password2 && (
+                      <span style={{ color: 'red', fontSize: '0.8rem' }}>
+                        Пароли не совпадают
+                      </span>
+                    )}
                 </div>
 
                 <button
                   type="submit"
                   className="auth-btn auth-btn-primary"
-                  disabled={!canRegister}
+                  disabled={!canRegister || loading}
                 >
-                  Зарегистрироваться
+                  {loading ? 'Регистрация...' : 'Зарегистрироваться'}
                 </button>
 
                 <p className="auth-bottom-text">
-                  Уже есть аккаунт?{" "}
+                  Уже есть аккаунт?{' '}
                   <button
                     type="button"
                     className="auth-link-inline"
                     onClick={() => {
-                      setMessage("");
-                      setTab("login");
+                      dispatch(clearError());
+                      setTab('login');
                     }}
                   >
                     Войти
@@ -353,11 +356,6 @@ export default function AuthPage() {
                 </p>
               </form>
             )}
-
-            <p className="auth-hint">
-              Сейчас это демо (без сервера). Следующий шаг — подключим запросы к
-              backend.
-            </p>
           </div>
         </main>
 

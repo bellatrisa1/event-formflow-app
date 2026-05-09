@@ -1,97 +1,123 @@
-import { Router } from "express";
-import { z } from "zod";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { pool } from "../db/pool";
-import { env } from "../config/env";
-import { requireAuth, type AuthedRequest } from "../middleware/auth";
+import { Router, Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import { v4 as uuid } from 'uuid';
+import { db } from '../db/database.js';
+import { signToken } from '../utils/jwt.js';
+import { asyncHandler } from '../utils/errors.js';
+import { authMiddleware } from '../middleware/auth.js';
+import { z } from 'zod';
 
-export const authRouter = Router();
+const router = Router();
 
 const registerSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().email(),
-  password: z.string().min(6),
+  name: z.string().min(1, 'Имя обязательно'),
+  email: z.string().email('Некорректный email'),
+  password: z.string().min(6, 'Пароль минимум 6 символов'),
 });
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+  email: z.string().email('Некорректный email'),
+  password: z.string().min(1, 'Пароль обязателен'),
 });
 
-function setAuthCookie(res: any, token: string) {
-  res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false, // локально false. На проде будет true (https)
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-}
+// POST /api/auth/register
+router.post(
+  '/register',
+  asyncHandler(async (req: Request, res: Response) => {
+    const body = registerSchema.parse(req.body);
+    const users = db.getUsers();
 
-authRouter.post("/register", async (req, res) => {
-  const parsed = registerSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: "Invalid body", issues: parsed.error.issues });
-
-  const { name, email, password } = parsed.data;
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  try {
-    const result = await pool.query(
-      `insert into users (name, email, password_hash)
-       values ($1, $2, $3)
-       on conflict (email) do nothing
-       returning id, name, email`,
-      [name, email, passwordHash]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(409).json({ message: "Email already exists" });
+    const existing = users.find((u) => u.email === body.email);
+    if (existing) {
+      res
+        .status(409)
+        .json({ message: 'Пользователь с таким email уже существует' });
+      return;
     }
 
-    const user = result.rows[0];
-    const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, { expiresIn: "7d" });
-    setAuthCookie(res, token);
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+    const newUser = {
+      id: uuid(),
+      name: body.name,
+      email: body.email,
+      password: hashedPassword,
+    };
 
-    return res.json({ user });
-  } catch (e: any) {
-    return res.status(500).json({ message: "Server error" });
-  }
+    users.push(newUser);
+    db.saveUsers(users);
+
+    const token = signToken({ userId: newUser.id, email: newUser.email });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, // true на production с HTTPS
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+    });
+
+    res.status(201).json({
+      user: { id: newUser.id, name: newUser.name, email: newUser.email },
+    });
+  })
+);
+
+// POST /api/auth/login
+router.post(
+  '/login',
+  asyncHandler(async (req: Request, res: Response) => {
+    const body = loginSchema.parse(req.body);
+    const users = db.getUsers();
+
+    const user = users.find((u) => u.email === body.email);
+    if (!user) {
+      res.status(401).json({ message: 'Неверный email или пароль' });
+      return;
+    }
+
+    const valid = await bcrypt.compare(body.password, user.password);
+    if (!valid) {
+      res.status(401).json({ message: 'Неверный email или пароль' });
+      return;
+    }
+
+    const token = signToken({ userId: user.id, email: user.email });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({
+      user: { id: user.id, name: user.name, email: user.email },
+    });
+  })
+);
+
+// GET /api/auth/me
+router.get(
+  '/me',
+  authMiddleware,
+  asyncHandler(async (req: Request, res: Response) => {
+    const users = db.getUsers();
+    const user = users.find((u) => u.id === req.userId);
+
+    if (!user) {
+      res.status(404).json({ message: 'Пользователь не найден' });
+      return;
+    }
+
+    res.json({
+      user: { id: user.id, name: user.name, email: user.email },
+    });
+  })
+);
+
+// POST /api/auth/logout
+router.post('/logout', (_req: Request, res: Response) => {
+  res.clearCookie('token');
+  res.json({ message: 'Вы вышли из системы' });
 });
 
-authRouter.post("/login", async (req, res) => {
-  const parsed = loginSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: "Invalid body", issues: parsed.error.issues });
-
-  const { email, password } = parsed.data;
-
-  const result = await pool.query(
-    `select id, name, email, password_hash
-     from users
-     where email = $1
-     limit 1`,
-    [email]
-  );
-
-  if (result.rowCount === 0) return res.status(401).json({ message: "Wrong email or password" });
-
-  const user = result.rows[0];
-  const ok = await bcrypt.compare(password, user.password_hash);
-  if (!ok) return res.status(401).json({ message: "Wrong email or password" });
-
-  const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, { expiresIn: "7d" });
-  setAuthCookie(res, token);
-
-  return res.json({ user: { id: user.id, name: user.name, email: user.email } });
-});
-
-authRouter.post("/logout", (req, res) => {
-  res.clearCookie("token");
-  return res.json({ ok: true });
-});
-
-authRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
-  const userId = req.userId!;
-  const result = await pool.query(`select id, name, email from users where id = $1`, [userId]);
-  if (result.rowCount === 0) return res.status(404).json({ message: "User not found" });
-  return res.json({ user: result.rows[0] });
-});
+export default router;

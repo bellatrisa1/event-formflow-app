@@ -1,4 +1,13 @@
-export type Theme = "violet" | "orange";
+export type Theme =
+  | "violet"
+  | "orange"
+  | "yellow"
+  | "green"
+  | "blue"
+  | "black"
+  | "white"
+  | "brown"
+  | "red";
 
 export type NavKey = "forms" | "analytics" | "profile";
 

@@ -27,7 +27,7 @@ body {
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
-    "Segoe UI",
+    'Segoe UI',
     sans-serif;
   background-color: var(--bg-page);
   color: var(--text-main);
@@ -38,16 +38,10 @@ body {
   min-height: 100vh;
 }
 
-.btn-danger {
-  background-color: #fee2e2;
-  color: #b91c1c;
+/* ============================
+   SIDEBAR
+   ============================ */
 
-  &:hover {
-    background-color: #fecaca;
-  }
-}
-
-/* Sidebar */
 .sidebar {
   display: none;
   flex-direction: column;
@@ -140,14 +134,20 @@ body {
   color: #9ca3af;
 }
 
-/* Main */
+/* ============================
+   MAIN
+   ============================ */
+
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Header */
+/* ============================
+   HEADER
+   ============================ */
+
 .main-header {
   display: flex;
   flex-direction: column;
@@ -187,9 +187,16 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+
+  @media (min-width: 1024px) {
+    flex-wrap: nowrap;
+  }
 }
 
-/* Buttons */
+/* ============================
+   BUTTONS
+   ============================ */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -210,6 +217,12 @@ body {
   &:focus {
     outline: 2px solid #e5e7eb;
     outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
   }
 }
 
@@ -233,19 +246,36 @@ body {
   }
 }
 
-/* Icons */
+.btn-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+
+  &:hover {
+    background-color: #fecaca;
+  }
+}
+
+/* ============================
+   ICONS
+   ============================ */
+
 .icon {
   width: 18px;
   height: 18px;
 }
+
 .icon-violet {
   color: var(--violet);
 }
+
 .icon-orange {
   color: var(--orange);
 }
 
-/* Search */
+/* ============================
+   SEARCH
+   ============================ */
+
 .search {
   position: relative;
 
@@ -279,12 +309,18 @@ body {
   }
 }
 
-/* Content */
+/* ============================
+   CONTENT
+   ============================ */
+
 .content {
   padding: 24px;
 }
 
-/* Toolbar */
+/* ============================
+   TOOLBAR
+   ============================ */
+
 .forms-toolbar {
   display: flex;
   flex-direction: column;
@@ -333,22 +369,44 @@ body {
   }
 }
 
-/* Forms grid */
+/* ============================
+   FORMS GRID
+   ============================ */
+
 .forms-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
   margin-bottom: 32px;
 
+  > * {
+    display: flex;
+    flex-direction: column;
+  }
+
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
   @media (min-width: 1024px) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .form-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-card-actions {
+    margin-top: auto;
+  }
 }
 
-/* Card base */
+/* ============================
+   CARD
+   ============================ */
+
 .card {
   background-color: var(--bg-white);
   border-radius: var(--radius-lg);
@@ -356,7 +414,10 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-/* Form card */
+/* ============================
+   FORM CARD
+   ============================ */
+
 .form-card {
   background-color: var(--bg-white);
   border-radius: var(--radius-lg);
@@ -390,10 +451,32 @@ body {
   justify-content: center;
 
   &--violet {
-    background-color: var(--violet-soft);
+    background-color: #ede9fe;
   }
   &--orange {
-    background-color: var(--orange-soft);
+    background-color: #ffedd5;
+  }
+  &--yellow {
+    background-color: #fef9c3;
+  }
+  &--green {
+    background-color: #dcfce7;
+  }
+  &--blue {
+    background-color: #dbeafe;
+  }
+  &--black {
+    background-color: #e5e5e5;
+  }
+  &--white {
+    background-color: #f5f5f5;
+    border: 1px solid #d4d4d4;
+  }
+  &--brown {
+    background-color: #fef3c7;
+  }
+  &--red {
+    background-color: #fee2e2;
   }
 }
 
@@ -411,9 +494,18 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+
+  .btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 110px;
+  }
 }
 
-/* Analytics */
+/* ============================
+   ANALYTICS
+   ============================ */
+
 .analytics {
   margin-top: 8px;
 }
@@ -467,6 +559,7 @@ body {
   &--violet {
     background-color: var(--violet-soft);
   }
+
   &--orange {
     background-color: var(--orange-soft);
   }
@@ -486,7 +579,10 @@ body {
   letter-spacing: -0.02em;
 }
 
-/* Chart */
+/* ============================
+   CHART
+   ============================ */
+
 .analytics-chart {
   padding: 12px;
   display: flex;
@@ -522,7 +618,10 @@ body {
   }
 }
 
-/* Table */
+/* ============================
+   TABLE
+   ============================ */
+
 .table-wrapper {
   margin-top: 24px;
   padding: 0;
@@ -563,16 +662,42 @@ body {
   }
 }
 
-.cell-highlight-violet {
-  color: #6d28d9;
+.cell-highlight {
   font-weight: 500;
-}
-.cell-highlight-orange {
-  color: var(--orange);
-  font-weight: 500;
+
+  &--violet {
+    color: #6d28d9;
+  }
+  &--orange {
+    color: #ea580c;
+  }
+  &--yellow {
+    color: #ca8a04;
+  }
+  &--green {
+    color: #16a34a;
+  }
+  &--blue {
+    color: #2563eb;
+  }
+  &--black {
+    color: #1f2937;
+  }
+  &--white {
+    color: #9ca3af;
+  }
+  &--brown {
+    color: #b45309;
+  }
+  &--red {
+    color: #dc2626;
+  }
 }
 
-/* Modal */
+/* ============================
+   MODAL
+   ============================ */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -652,10 +777,14 @@ body {
   margin-top: 6px;
 }
 
-/* Profile */
+/* ============================
+   PROFILE
+   ============================ */
+
 .profile-card {
   padding: 16px;
 }
+
 .profile-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -672,10 +801,12 @@ body {
   border: 1px solid var(--border-soft);
   background: #fafafa;
 }
+
 .profile-label {
   font-size: 12px;
   color: var(--text-muted);
 }
+
 .profile-value {
   font-size: 14px;
   font-weight: 600;

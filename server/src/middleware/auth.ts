@@ -1,18 +1,33 @@
-import type { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { env } from "../config/env";
+import { Request, Response, NextFunction } from 'express';
+import { verifyToken } from '../utils/jwt.js';
 
-export type AuthedRequest = Request & { userId?: string };
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+      userEmail?: string;
+    }
+  }
+}
 
-export function requireAuth(req: AuthedRequest, res: Response, next: NextFunction) {
+export function authMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
   const token = req.cookies?.token;
-  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  if (!token) {
+    res.status(401).json({ message: 'Не авторизован' });
+    return;
+  }
 
   try {
-    const payload = jwt.verify(token, env.JWT_SECRET) as { userId: string };
+    const payload = verifyToken(token);
     req.userId = payload.userId;
+    req.userEmail = payload.email;
     next();
   } catch {
-    return res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ message: 'Неверный или истёкший токен' });
   }
 }
