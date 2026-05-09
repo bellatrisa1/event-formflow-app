@@ -43,8 +43,7 @@
 ### 1. Клонируй репозиторий
 
 ```bash
-git clone https://github.com/твой-юзернейм/eventforms.git
-cd eventforms
+git https://github.com/bellatrisa1/event-formflow-app.git
 ```
 
 ### 2. Установи зависимости
