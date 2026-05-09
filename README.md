@@ -6,7 +6,7 @@
 
 ---
 
-🔗 Demo:
+🔗 Demo: https://event-formflow-app.vercel.app/
 
 ## ✨ Возможности
 
