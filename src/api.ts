@@ -1,6 +1,6 @@
 import type { FormItem, FormDraft } from './types/types';
 
-const API_URL = 'http://localhost:5050';
+const API_URL = window.location.origin;
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
