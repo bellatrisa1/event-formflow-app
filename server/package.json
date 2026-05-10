@@ -1,7 +1,6 @@
 {
   "name": "eventforms-server",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc --skipLibCheck || true && npm run copy-assets",
