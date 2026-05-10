@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: eventforms
+    env: node
+    buildCommand: |
+      cd server && npm install && npm run build
+      cd .. && npm install && npm run build
+      mkdir -p server/client && cp -r dist/* server/client/
+    startCommand: cd server && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
